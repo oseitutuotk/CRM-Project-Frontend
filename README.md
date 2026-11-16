@@ -4,11 +4,7 @@ A modern, responsive React frontend designed to demonstrate and interact with th
 
 ---
 
-## 🚀 Live Tunnel Connection
-Your frontend is pre-configured to proxy API calls directly to your friend's Microsoft Dev Tunnel:
-```text
-https://vcc4ftq2-7293.uks1.devtunnels.ms
-```
+
 
 ### Why the built-in proxy is great:
 - **No CORS errors:** Your browser communicates locally with `http://localhost:3000/api`, and Vite securely forwards the requests to your friend's machine.
