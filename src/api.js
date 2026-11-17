@@ -2,11 +2,22 @@
 
 // Allow dynamic API base URL so user can toggle between Dev Tunnel, local proxy, or localhost
 export const getApiBaseUrl = () => {
-  return localStorage.getItem('microphoenix_api_url') || '';
+  const custom = localStorage.getItem('microphoenix_api_url');
+  // Clean up any stale direct devtunnel link saved in localStorage so the Vite proxy takes precedence
+  if (custom && custom.includes('devtunnels.ms')) {
+    localStorage.removeItem('microphoenix_api_url');
+    return '';
+  }
+  return custom || '';
 };
 
 export const setApiBaseUrl = (url) => {
-  localStorage.setItem('microphoenix_api_url', url);
+  if (!url || url.includes('devtunnels.ms')) {
+    // If empty or devtunnel, let Vite proxy handle it
+    localStorage.removeItem('microphoenix_api_url');
+  } else {
+    localStorage.setItem('microphoenix_api_url', url);
+  }
 };
 
 export const getAuthToken = () => {
@@ -78,7 +89,7 @@ async function request(path, options = {}) {
     return {
       ok: false,
       status: 0,
-      error: `Could not connect to ${baseUrl}. Make sure your ASP.NET backend is running! (${err.message})`,
+      error: `Unable to connect to the pension trustee service. Please verify network connectivity and try again.`,
       data: null,
     };
   }

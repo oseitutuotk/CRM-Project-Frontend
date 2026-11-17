@@ -2,16 +2,16 @@ import React from 'react';
 import { 
   Users, 
   Layers, 
-  Wallet, 
   TrendingUp, 
-  PlusCircle, 
-  ArrowUpRight, 
-  ShieldCheck, 
-  Activity, 
-  Database,
-  Building2,
-  CheckCircle,
-  PiggyBank
+  Plus, 
+  Building2, 
+  ArrowRight,
+  ShieldCheck,
+  Coins,
+  Clock,
+  ArrowUpRight,
+  UserPlus,
+  BadgePercent
 } from 'lucide-react';
 
 export default function Dashboard({ 
@@ -28,206 +28,219 @@ export default function Dashboard({
 
   const stats = [
     {
-      title: 'Total Members',
-      value: users.length,
-      change: 'Active clients',
-      icon: Users,
-      color: 'from-blue-500 to-indigo-600',
-      actionTab: 'users'
-    },
-    {
-      title: 'Pension Schemes',
-      value: schemes.length,
-      change: `${tier2Count} Tier-2 · ${tier3Count} Tier-3`,
-      icon: Layers,
-      color: 'from-amber-500 to-orange-600',
-      actionTab: 'schemes'
-    },
-    {
-      title: 'Active Enrollments',
-      value: enrollments.length,
-      change: 'Portfolio accounts',
-      icon: Wallet,
-      color: 'from-emerald-500 to-teal-600',
-      actionTab: 'enrollments'
-    },
-    {
-      title: 'Total Funds Managed',
+      title: 'Total Member Balances',
       value: `GH₵ ${totalBalance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
-      change: 'Sum of member balances',
-      icon: PiggyBank,
-      color: 'from-rose-500 to-pink-600',
-      actionTab: 'enrollments'
+      description: 'Active scheme savings & assets',
+      icon: Coins,
+      iconBg: 'bg-[#fbf7ec] text-[#c59b27] border-[#ecdab1]',
+      actionTab: 'users',
+    },
+    {
+      title: 'Enrolled Members',
+      value: users.length.toLocaleString(),
+      description: 'Active scheme contributors',
+      icon: Users,
+      iconBg: 'bg-slate-100 text-[#0f1d33] border-slate-200',
+      actionTab: 'users',
+    },
+    {
+      title: 'Approved Schemes',
+      value: schemes.length.toLocaleString(),
+      description: `${tier2Count} Tier 2 (Occupational) · ${tier3Count} Tier 3 (Voluntary)`,
+      icon: Layers,
+      iconBg: 'bg-slate-100 text-[#0f1d33] border-slate-200',
+      actionTab: 'schemes',
+    },
+    {
+      title: 'Active Scheme Accounts',
+      value: enrollments.length.toLocaleString(),
+      description: 'Fund portfolios under management',
+      icon: ShieldCheck,
+      iconBg: 'bg-[#fbf7ec] text-[#c59b27] border-[#ecdab1]',
+      actionTab: 'users',
     },
   ];
 
   return (
-    <div className="space-y-8 animate-fadeIn">
-      {/* Welcome Banner */}
-      <div className="relative overflow-hidden rounded-3xl bg-linear-to-r from-slate-900 via-slate-800 to-indigo-950 text-white p-8 shadow-xl">
-        <div className="relative z-10 max-w-2xl">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/90 text-xs font-medium backdrop-blur-md mb-4 border border-white/10">
-            <Activity className="w-3.5 h-3.5 text-amber-400" />
-            <span>ASP.NET Core 9 + PostgreSQL + React Live Demo</span>
+    <div className="space-y-6 animate-fadeIn">
+      {/* Executive Welcome & Actions Header */}
+      <div className="bg-white border border-slate-200 rounded-xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs hover:border-slate-300 transition-all duration-200">
+        <div>
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-4 ring-emerald-50"></span>
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Petra Trust Operations</span>
           </div>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white mb-2">
-            Pension CRM Dashboard
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#0f1d33] tracking-tight">
+            Executive Overview
           </h1>
-          <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-            Welcome to the MicroPhoenix management console. Monitor member enrollments, track scheme unit values, and process contributions and redemptions seamlessly.
+          <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-xl">
+            Real-time administration of Tier 2 mandatory and Tier 3 voluntary pension funds, member records, and unit pricing.
           </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <button
-              onClick={() => onQuickAction('add-member')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm transition-all shadow-md shadow-amber-500/20"
-            >
-              <PlusCircle className="w-4 h-4" />
-              Register Member
-            </button>
-            <button
-              onClick={() => onQuickAction('enroll-member')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-semibold text-sm transition-all border border-white/10"
-            >
-              <Wallet className="w-4 h-4" />
-              Enroll in Scheme
-            </button>
-            <button
-              onClick={() => onQuickAction('contribution')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm transition-all shadow-md shadow-emerald-600/20"
-            >
-              <TrendingUp className="w-4 h-4" />
-              Deposit Contribution
-            </button>
-          </div>
         </div>
-        
-        {/* Decorative background glow */}
-        <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-linear-to-l from-rose-500/20 to-transparent pointer-events-none" />
+
+        {/* Primary Action Buttons with pronounced hover states */}
+        <div className="flex flex-wrap items-center gap-2.5">
+          <button
+            onClick={() => onQuickAction('add-member')}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#0f1d33] font-bold text-xs border border-slate-200 hover:border-slate-300 shadow-2xs hover:shadow-xs hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-150"
+          >
+            <UserPlus className="w-3.5 h-3.5 text-[#0f1d33]" />
+            Register Member
+          </button>
+          <button
+            onClick={() => onQuickAction('add-scheme')}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0f1d33] hover:bg-[#182b49] text-white font-bold text-xs shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-150"
+          >
+            <Plus className="w-3.5 h-3.5 text-[#c59b27]" />
+            Create Scheme
+          </button>
+        </div>
       </div>
 
-      {/* Metric Cards Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      {/* Institutional KPI Cards with Titles & Icons */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, idx) => {
           const Icon = stat.icon;
           return (
             <div
               key={idx}
               onClick={() => onNavigate(stat.actionTab)}
-              className="cursor-pointer group bg-white p-6 rounded-2xl border border-slate-200/80 hover:border-slate-300 shadow-xs hover:shadow-lg transition-all duration-200 relative overflow-hidden"
+              className="bg-white border border-slate-200 hover:border-[#c59b27]/60 rounded-xl p-5 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-md group relative overflow-hidden"
             >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              {/* Card Title & Icon */}
+              <div className="flex items-center justify-between mb-3">
+                <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                   {stat.title}
                 </span>
-                <div className={`w-10 h-10 rounded-xl bg-linear-to-tr ${stat.color} flex items-center justify-center text-white shadow-xs`}>
-                  <Icon className="w-5 h-5" />
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shadow-2xs transition-transform duration-200 group-hover:scale-110 ${stat.iconBg}`}>
+                  <Icon className="w-4 h-4" />
                 </div>
               </div>
-              <div className="text-2xl sm:text-3xl font-extrabold text-slate-900 mb-1">
+
+              {/* Value */}
+              <div className="text-2xl font-black text-[#0f1d33] tracking-tight mb-1 group-hover:text-[#0f1d33] transition-colors">
                 {stat.value}
               </div>
-              <div className="flex items-center justify-between text-xs text-slate-500">
-                <span>{stat.change}</span>
-                <span className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform text-slate-400 group-hover:text-slate-900 font-medium inline-flex items-center">
-                  View <ArrowUpRight className="w-3.5 h-3.5 ml-0.5" />
-                </span>
+
+              {/* Description & Action */}
+              <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+                <span className="truncate pr-2">{stat.description}</span>
+                <ArrowRight className="w-3.5 h-3.5 text-slate-400 group-hover:text-[#c59b27] group-hover:translate-x-1 transition-all duration-150 shrink-0" />
               </div>
             </div>
           );
         })}
       </div>
 
-      {/* Two Column Layout: Schemes Summary & Quick Test Flow */}
+      {/* Schemes and Member Portfolios Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Schemes Preview */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-6 shadow-xs">
-          <div className="flex items-center justify-between mb-5">
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Available Pension Schemes</h2>
-              <p className="text-xs text-slate-500">Active pension products managed by the system</p>
+        {/* Left Column: Approved Schemes Preview */}
+        <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-6 hover:border-slate-300 transition-all duration-200 shadow-2xs">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-[#fbf7ec] border border-[#ecdab1] flex items-center justify-center text-[#c59b27]">
+                <Layers className="w-4 h-4" />
+              </div>
+              <div>
+                <h2 className="text-sm font-bold text-[#0f1d33]">Approved Pension Schemes</h2>
+                <p className="text-xs text-slate-500">Tier 2 mandatory and Tier 3 voluntary products</p>
+              </div>
             </div>
             <button
               onClick={() => onNavigate('schemes')}
-              className="text-xs font-semibold text-rose-600 hover:text-rose-700 hover:underline"
+              className="text-xs font-bold text-[#c59b27] hover:text-[#937119] flex items-center gap-1 hover:translate-x-0.5 transition-all duration-150"
             >
-              Manage all ({schemes.length})
+              Manage ({schemes.length}) <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
           {schemes.length === 0 ? (
-            <div className="text-center py-10 border border-dashed border-slate-200 rounded-xl">
-              <Building2 className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-              <p className="text-sm font-medium text-slate-600">No schemes registered yet</p>
-              <p className="text-xs text-slate-400 mt-1">Create your first scheme to start enrolling members.</p>
+            <div className="text-center py-10 border border-dashed border-slate-200 rounded-lg">
+              <Building2 className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-xs font-semibold text-slate-600">No schemes registered in database</p>
               <button
                 onClick={() => onQuickAction('add-scheme')}
-                className="mt-3 px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-900 text-white hover:bg-slate-800"
+                className="mt-3 px-3.5 py-1.5 text-xs font-bold rounded-lg bg-[#0f1d33] text-white hover:bg-[#182b49] transition-all"
               >
                 Create Scheme
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
               {schemes.slice(0, 4).map((scheme) => (
                 <div
                   key={scheme.id}
-                  className="p-4 rounded-xl border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-slate-50 transition-colors"
+                  onClick={() => onNavigate('schemes')}
+                  className="p-4 rounded-lg border border-slate-200/80 hover:border-[#c59b27]/60 bg-slate-50/50 hover:bg-white hover:shadow-xs hover:-translate-y-0.5 cursor-pointer transition-all duration-200"
                 >
-                  <div className="flex items-start justify-between gap-2 mb-2">
-                    <span className="font-bold text-sm text-slate-900 line-clamp-1">{scheme.name}</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                      scheme.tier === 0 || scheme.tier === 'Tier2'
-                        ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                        : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    }`}>
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="font-bold text-xs text-[#0f1d33] truncate">{scheme.name}</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200/80 text-slate-700">
                       {scheme.tier === 0 || scheme.tier === 'Tier2' ? 'Tier 2' : 'Tier 3'}
                     </span>
                   </div>
-                  <div className="text-xs font-mono text-slate-500 mb-2">Code: {scheme.code}</div>
-                  <p className="text-xs text-slate-600 line-clamp-2">{scheme.description || 'No description provided.'}</p>
+                  <div className="text-[11px] font-mono text-slate-500 mb-2">Code: {scheme.code}</div>
+                  <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
+                    {scheme.description || 'Master trust and provident fund scheme product.'}
+                  </p>
                 </div>
               ))}
             </div>
           )}
         </div>
 
-        {/* Right Column: Demo Checklist & System Architecture */}
-        <div className="bg-slate-900 rounded-2xl p-6 text-white shadow-xs flex flex-col justify-between">
+        {/* Right Column: Member Accounts & Quick Shortcuts */}
+        <div className="bg-white border border-slate-200 rounded-xl p-6 flex flex-col justify-between hover:border-slate-300 transition-all duration-200 shadow-2xs">
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <ShieldCheck className="w-5 h-5 text-amber-400" />
-              <h2 className="text-base font-bold text-white">System Architecture</h2>
+            <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-7 h-7 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-[#0f1d33]">
+                  <Users className="w-4 h-4" />
+                </div>
+                <h2 className="text-sm font-bold text-[#0f1d33]">Recent Portfolios</h2>
+              </div>
+              <button
+                onClick={() => onNavigate('users')}
+                className="text-xs font-bold text-[#c59b27] hover:text-[#937119] flex items-center gap-0.5 hover:translate-x-0.5 transition-all duration-150"
+              >
+                Directory <ArrowRight className="w-3.5 h-3.5" />
+              </button>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed mb-4">
-              This frontend directly talks to your ASP.NET Core Web API with JWT-protected endpoints:
-            </p>
-            <ul className="space-y-2.5 text-xs text-slate-300">
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span><strong>Role-Based Security:</strong> AdminOnly & Member policies</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span><strong>PostgreSQL Database:</strong> Entity Framework Core</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span><strong>Ledger Operations:</strong> Contributions & Redemptions</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckCircle className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span><strong>Market NAV:</strong> Historic unit valuation tracking</span>
-              </li>
-            </ul>
+
+            {enrollments.length === 0 ? (
+              <p className="text-xs text-slate-400 py-8 text-center italic">
+                No scheme accounts yet. Register and enroll members to view balances here.
+              </p>
+            ) : (
+              <div className="space-y-2">
+                {enrollments.slice(0, 4).map((enr) => (
+                  <div
+                    key={enr.id}
+                    onClick={() => onNavigate('users')}
+                    className="flex items-center justify-between p-3 rounded-lg border border-slate-100 hover:border-slate-200 bg-slate-50/50 hover:bg-white hover:shadow-2xs text-xs cursor-pointer transition-all duration-150"
+                  >
+                    <div>
+                      <div className="font-bold text-slate-900 truncate max-w-[140px]">
+                        {enr.scheme?.name || `Scheme #${enr.schemeId}`}
+                      </div>
+                      <div className="text-[10px] text-slate-400 font-mono">
+                        Account #{enr.id}
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-extrabold text-[#0f1d33]">
+                        GH₵ {Number(enr.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-800 text-xs text-slate-400">
-            <span className="text-slate-200 font-semibold">Logged in as:</span>{' '}
-            {currentUser ? (
-              <span className="font-mono text-amber-400">{currentUser.email}</span>
-            ) : (
-              <span className="italic text-slate-400">Anonymous (Sign in to unlock all operations)</span>
-            )}
+          <div className="pt-4 mt-4 border-t border-slate-100 text-[11px] text-slate-400 flex items-center justify-between">
+            <span className="font-semibold text-slate-600">Trustee Ledger</span>
+            <span className="font-mono text-slate-500">{new Date().toLocaleDateString(undefined, { dateStyle: 'medium' })}</span>
           </div>
         </div>
       </div>

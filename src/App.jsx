@@ -3,7 +3,6 @@ import Navbar from './components/Navbar';
 import Dashboard from './components/Dashboard';
 import UsersTab from './components/UsersTab';
 import SchemesTab from './components/SchemesTab';
-import EnrollmentsTab from './components/EnrollmentsTab';
 import AuthModal from './components/AuthModal';
 import { 
   authApi, 
@@ -11,23 +10,19 @@ import {
   schemesApi, 
   enrollmentsApi, 
   getCurrentUser, 
-  setAuthSession, 
-  getApiBaseUrl 
+  setAuthSession 
 } from './api';
 import { 
   AlertCircle, 
   CheckCircle2, 
   Info, 
-  RefreshCw, 
-  Server,
-  Sparkles
+  RefreshCw
 } from 'lucide-react';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [currentUser, setCurrentUser] = useState(getCurrentUser());
   const [authModalOpen, setAuthModalOpen] = useState(false);
-  const [backendStatus, setBackendStatus] = useState('checking'); // 'online' | 'offline' | 'checking'
 
   // Data lists
   const [users, setUsers] = useState([]);
@@ -36,11 +31,9 @@ export default function App() {
   const [loading, setLoading] = useState(false);
 
   // Quick Action Modal states
-  const [activeEnrollModal, setActiveEnrollModal] = useState(false);
   const [prefilledUserForEnroll, setPrefilledUserForEnroll] = useState(null);
-  const [activeDepositEnrollment, setActiveDepositEnrollment] = useState(null);
 
-  // Toast / notification
+  // Notification Toast
   const [toast, setToast] = useState(null);
 
   const showToast = (message, type = 'success') => {
@@ -50,35 +43,39 @@ export default function App() {
     }, 4000);
   };
 
-  // Test backend connection & fetch data
+  // Fetch data from API
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      // 1. Fetch schemes (requires auth, or returns 401 if not logged in)
-      const schemesRes = await schemesApi.getAll();
-      if (schemesRes.ok) {
-        setSchemes(schemesRes.data || []);
-        setBackendStatus('online');
-      } else if (schemesRes.status === 401) {
-        setBackendStatus('online'); // API responded, just unauthorized
+      const [schemesRes, usersRes] = await Promise.all([
+        schemesApi.getAll(),
+        usersApi.getAll()
+      ]);
+
+      if (schemesRes.ok) setSchemes(schemesRes.data || []);
+
+      let allEnrollments = [];
+      if (usersRes.ok && Array.isArray(usersRes.data)) {
+        const userList = usersRes.data;
+        setUsers(userList);
+
+        // Retrieve scheme enrollments for each user using the supported /api/users/{id}/enrollments endpoint
+        const enrollmentPromises = userList.map((u) => usersApi.getUserEnrollments(u.id));
+        const enrollmentResults = await Promise.all(enrollmentPromises);
+
+        allEnrollments = enrollmentResults
+          .filter((res) => res.ok && Array.isArray(res.data))
+          .flatMap((res) => res.data);
       } else {
-        setBackendStatus('offline');
+        const fallbackRes = await enrollmentsApi.getAll();
+        if (fallbackRes.ok && Array.isArray(fallbackRes.data)) {
+          allEnrollments = fallbackRes.data;
+        }
       }
 
-      // 2. Fetch users
-      const usersRes = await usersApi.getAll();
-      if (usersRes.ok) {
-        setUsers(usersRes.data || []);
-      }
-
-      // 3. Fetch enrollments
-      const enrollmentsRes = await enrollmentsApi.getAll();
-      if (enrollmentsRes.ok) {
-        setEnrollments(enrollmentsRes.data || []);
-      }
+      setEnrollments(allEnrollments);
     } catch (err) {
-      console.error('Fetch error:', err);
-      setBackendStatus('offline');
+      console.error('Data sync error:', err);
     } finally {
       setLoading(false);
     }
@@ -88,11 +85,10 @@ export default function App() {
     fetchData();
   }, [fetchData]);
 
-  // Handle Authentication
+  // Authentication
   const handleLogin = async (email, password) => {
     const res = await authApi.login(email, password);
     if (res.ok && res.data) {
-      // Backend returns LoginResponse: { accessToken, expiresAt, userID/userId, email, role }
       const session = {
         accessToken: res.data.accessToken || res.data.token,
         userId: res.data.userID || res.data.userId || res.data.id,
@@ -101,17 +97,17 @@ export default function App() {
       };
       setAuthSession(session);
       setCurrentUser(session);
-      showToast(`Welcome back, ${session.email}! Signed in successfully.`, 'success');
+      showToast('Signed in successfully.', 'success');
       await fetchData();
       return { ok: true };
     }
-    return { ok: false, error: res.error || 'Login failed' };
+    return { ok: false, error: res.error || 'Authentication failed' };
   };
 
   const handleRegister = async (formData) => {
     const res = await authApi.register(formData);
     if (res.ok) {
-      showToast('Registration successful! You can now log in.', 'success');
+      showToast('Account registered successfully.', 'success');
       await fetchData();
       return { ok: true };
     }
@@ -121,7 +117,7 @@ export default function App() {
   const handleLogout = () => {
     setAuthSession(null);
     setCurrentUser(null);
-    showToast('Signed out of MicroPhoenix.', 'info');
+    showToast('Signed out of session.', 'info');
   };
 
   // Quick Action Handlers
@@ -131,33 +127,19 @@ export default function App() {
     } else if (action === 'add-scheme') {
       setActiveTab('schemes');
     } else if (action === 'enroll-member') {
-      setActiveTab('enrollments');
-      setActiveEnrollModal(true);
-    } else if (action === 'contribution') {
-      setActiveTab('enrollments');
-      if (enrollments.length > 0) {
-        setActiveDepositEnrollment(enrollments[0]);
-      } else {
-        showToast('Please enroll a member in a scheme first.', 'info');
+      setActiveTab('users');
+      if (users.length > 0) {
+        setPrefilledUserForEnroll(users[0]);
       }
+    } else if (action === 'contribution') {
+      setActiveTab('users');
     }
-  };
-
-  const handleEnrollUserShortcut = (user) => {
-    setPrefilledUserForEnroll(user);
-    setActiveTab('enrollments');
-    setActiveEnrollModal(true);
-  };
-
-  const handleContributeShortcut = (enrollment) => {
-    setActiveDepositEnrollment(enrollment);
-    setActiveTab('enrollments');
   };
 
   const handleCreateScheme = async (schemeData) => {
     const res = await schemesApi.create(schemeData);
     if (res.ok) {
-      showToast(`Scheme "${schemeData.name}" created successfully!`, 'success');
+      showToast(`Scheme "${schemeData.name}" created successfully.`, 'success');
       await fetchData();
       return { ok: true };
     }
@@ -167,21 +149,7 @@ export default function App() {
   const handleCreateUser = async (userData) => {
     const res = await authApi.register(userData);
     if (res.ok) {
-      showToast(`Member "${userData.otherNames} ${userData.lastName}" added!`, 'success');
-      await fetchData();
-      return { ok: true };
-    }
-    return { ok: false, error: res.error };
-  };
-
-  const handleNewEnrollment = async (enrollData) => {
-    if (enrollData.isPromptOnly) {
-      setActiveEnrollModal(true);
-      return;
-    }
-    const res = await enrollmentsApi.create(enrollData);
-    if (res.ok) {
-      showToast('Member successfully enrolled in scheme!', 'success');
+      showToast(`Member "${userData.otherNames} ${userData.lastName}" registered.`, 'success');
       await fetchData();
       return { ok: true };
     }
@@ -189,54 +157,34 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-rose-500 selection:text-white">
-      {/* Top Navbar */}
+    <div className="min-h-screen bg-slate-50 flex flex-col font-sans selection:bg-[#0f1d33] selection:text-white">
+      {/* Top Navigation */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         user={currentUser}
         onOpenAuth={() => setAuthModalOpen(true)}
         onLogout={handleLogout}
-        onTestConnection={fetchData}
-        backendStatus={backendStatus}
       />
 
-      {/* Backend Offline Warning Banner */}
-      {backendStatus === 'offline' && (
-        <div className="bg-amber-500 text-slate-950 px-4 py-3 text-xs sm:text-sm font-semibold flex items-center justify-between shadow-xs">
-          <div className="flex items-center gap-2 max-w-7xl mx-auto w-full">
-            <Server className="w-4 h-4 shrink-0 animate-bounce" />
-            <span>
-              Backend is not reachable at <code>{getApiBaseUrl() || 'Dev Tunnel (https://vcc4ftq2-7293.uks1.devtunnels.ms)'}</code>. Make sure your friend's tunnel or your local backend is running!
-            </span>
-          </div>
-          <button
-            onClick={fetchData}
-            className="px-2.5 py-1 rounded bg-slate-900 text-white text-xs hover:bg-slate-800 transition-colors ml-4 shrink-0"
-          >
-            Retry
-          </button>
-        </div>
-      )}
-
-      {/* Floating Toast Notification */}
+      {/* Floating Notifications */}
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 animate-slideUp">
           <div
-            className={`flex items-center gap-2.5 px-4 py-3 rounded-2xl shadow-xl text-sm font-medium text-white border ${
+            className={`flex items-center gap-2.5 px-4 py-3 rounded-lg shadow-lg text-xs font-semibold text-white border ${
               toast.type === 'success'
-                ? 'bg-emerald-600 border-emerald-500'
+                ? 'bg-[#0f1d33] border-slate-700'
                 : toast.type === 'error'
-                ? 'bg-rose-600 border-rose-500'
-                : 'bg-slate-900 border-slate-800'
+                ? 'bg-rose-900 border-rose-800'
+                : 'bg-slate-800 border-slate-700'
             }`}
           >
             {toast.type === 'success' ? (
-              <CheckCircle2 className="w-4 h-4 text-emerald-200" />
+              <CheckCircle2 className="w-4 h-4 text-[#c59b27]" />
             ) : toast.type === 'error' ? (
-              <AlertCircle className="w-4 h-4 text-rose-200" />
+              <AlertCircle className="w-4 h-4 text-rose-300" />
             ) : (
-              <Info className="w-4 h-4 text-blue-200" />
+              <Info className="w-4 h-4 text-slate-300" />
             )}
             <span>{toast.message}</span>
           </div>
@@ -245,20 +193,17 @@ export default function App() {
 
       {/* Main Content Area */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* If user is not logged in, show an informative banner with 1-click test button */}
+        {/* Guest Session Bar (Subtle & Professional) */}
         {!currentUser && (
-          <div className="mb-6 p-4 rounded-2xl bg-indigo-50 border border-indigo-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <div className="flex items-start sm:items-center gap-2.5">
-              <Sparkles className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5 sm:mt-0" />
-              <div className="text-xs text-indigo-950">
-                <strong>You are currently browsing anonymously.</strong> Sign in as an Admin or Member to unlock protected endpoints, create schemes, and manage pension funds.
-              </div>
+          <div className="mb-6 p-4 rounded-xl bg-white border border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs hover:border-slate-300 transition-all duration-200">
+            <div className="text-xs text-slate-600">
+              <strong className="text-slate-900">Guest Access:</strong> You are viewing read-only records. Sign in with trustee credentials to record contributions, manage schemes, or enroll members.
             </div>
             <button
               onClick={() => setAuthModalOpen(true)}
-              className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white hover:bg-indigo-700 shrink-0 self-start sm:self-auto shadow-xs"
+              className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#0f1d33] hover:bg-[#182b49] text-white shrink-0 self-start sm:self-auto transition-all shadow-2xs active:scale-95"
             >
-              Sign In / Quick Demo
+              Sign In
             </button>
           </div>
         )}
@@ -278,10 +223,11 @@ export default function App() {
         {activeTab === 'users' && (
           <UsersTab
             users={users}
+            schemes={schemes}
             onRefresh={fetchData}
             onAddUser={handleCreateUser}
-            onEnrollUser={handleEnrollUserShortcut}
-            onContribute={handleContributeShortcut}
+            prefilledUserForEnroll={prefilledUserForEnroll}
+            onClearPrefilledUser={() => setPrefilledUserForEnroll(null)}
           />
         )}
 
@@ -293,42 +239,26 @@ export default function App() {
             currentUser={currentUser}
           />
         )}
-
-        {activeTab === 'enrollments' && (
-          <EnrollmentsTab
-            enrollments={enrollments}
-            users={users}
-            schemes={schemes}
-            onRefresh={fetchData}
-            onNewEnrollment={handleNewEnrollment}
-            activeEnrollModal={activeEnrollModal}
-            onCloseEnrollModal={() => {
-              setActiveEnrollModal(false);
-              setPrefilledUserForEnroll(null);
-            }}
-            prefilledUser={prefilledUserForEnroll}
-            activeDepositEnrollment={activeDepositEnrollment}
-            onCloseDepositModal={() => setActiveDepositEnrollment(null)}
-          />
-        )}
       </main>
 
-      {/* Footer */}
-      <footer className="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div>
-            <strong>MicroPhoenix CRM</strong> · ASP.NET Core Web API + PostgreSQL Backend & React Frontend
+      {/* Corporate Institutional Footer */}
+      <footer className="bg-white border-t border-slate-200 py-6 text-xs text-slate-500">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-slate-700">Petra Trust Company Limited</span>
+            <span>·</span>
+            <span>Licensed Corporate Trustee</span>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 text-[11px] text-slate-400">
             <button
               onClick={fetchData}
-              className="inline-flex items-center gap-1 hover:text-slate-800"
+              className="inline-flex items-center gap-1.5 font-semibold text-slate-600 hover:text-slate-900 transition-colors"
             >
-              <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
-              Refresh Data
+              <RefreshCw className={`w-3.5 h-3.5 ${loading ? 'animate-spin text-[#c59b27]' : ''}`} />
+              Sync Records
             </button>
             <span>·</span>
-            <span>Local Dev Environment</span>
+            <span>Confidential & Proprietary</span>
           </div>
         </div>
       </footer>

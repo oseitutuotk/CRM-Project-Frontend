@@ -4,12 +4,12 @@ import {
   Plus, 
   TrendingUp, 
   Calendar, 
-  DollarSign, 
   X, 
   AlertCircle, 
-  Building2,
-  Clock,
-  ShieldAlert
+  Building2, 
+  Clock, 
+  CheckCircle2,
+  Coins
 } from 'lucide-react';
 import { schemesApi } from '../api';
 
@@ -65,7 +65,7 @@ export default function SchemesTab({
         setNewScheme({ name: '', code: '', description: '', tier: 0 });
         onRefresh();
       } else {
-        setCreateError(res.error || 'Failed to create scheme. Make sure you are logged in as an Admin.');
+        setCreateError(res.error || 'Failed to create scheme. Administrator permissions required.');
       }
     } finally {
       setCreateSubmitting(false);
@@ -83,12 +83,11 @@ export default function SchemesTab({
         effectiveDate: new Date().toISOString(),
       });
       if (res.ok) {
-        // Refresh NAV history
         const refreshed = await schemesApi.getNavHistory(selectedSchemeForNav.id);
         if (refreshed.ok) setNavHistory(refreshed.data || []);
         setNewNavPrice('');
       } else {
-        setNavError(res.error || 'Failed to record NAV. (Admin privileges required)');
+        setNavError(res.error || 'Failed to record NAV valuation.');
       }
     } finally {
       setNavSubmitting(false);
@@ -98,77 +97,84 @@ export default function SchemesTab({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header and Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-xs hover:border-slate-300 transition-all duration-200">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Layers className="w-5 h-5 text-amber-500" />
-            Pension Schemes & Unit Pricing (NAV)
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Product Catalog</span>
+          </div>
+          <h2 className="text-xl sm:text-2xl font-extrabold text-[#0f1d33] flex items-center gap-2 tracking-tight">
+            <Layers className="w-6 h-6 text-[#c59b27]" />
+            Pension Schemes & Unit Pricing
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Manage Tier 2 mandatory and Tier 3 voluntary provident funds and historical NAV rates
+            Registered Tier 2 mandatory occupational schemes and Tier 3 voluntary provident funds
           </p>
         </div>
 
         <button
           onClick={() => setShowCreateModal(true)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-semibold text-sm shadow-xs transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#0f1d33] hover:bg-[#182b49] text-white font-bold text-xs shadow-xs hover:shadow-md hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-150"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5 text-[#c59b27]" />
           Create Scheme
         </button>
       </div>
 
-      {/* Schemes Grid */}
+      {/* Schemes Grid with icons & pronounced hover elevation */}
       {schemes.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center shadow-xs">
-          <Building2 className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-          <h3 className="text-base font-bold text-slate-800">No Schemes Found</h3>
+        <div className="bg-white rounded-xl border border-slate-200 p-12 text-center shadow-xs">
+          <Building2 className="w-10 h-10 text-slate-300 mx-auto mb-2" />
+          <h3 className="text-sm font-bold text-slate-800">No Schemes Configured</h3>
           <p className="text-xs text-slate-500 max-w-sm mx-auto mt-1 mb-4">
-            Get started by adding your first pension or provident scheme to the platform.
+            Create an approved pension scheme to begin enrolling members.
           </p>
           <button
             onClick={() => setShowCreateModal(true)}
-            className="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-semibold rounded-xl"
+            className="px-4 py-2 bg-[#0f1d33] hover:bg-[#182b49] text-white text-xs font-bold rounded-lg shadow-xs hover:shadow-sm transition-all"
           >
-            Create Scheme Now
+            Create Scheme
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {schemes.map((scheme) => {
             const isTier2 = scheme.tier === 0 || scheme.tier === 'Tier2';
             return (
               <div
                 key={scheme.id}
-                className="bg-white rounded-2xl border border-slate-200 p-6 flex flex-col justify-between shadow-xs hover:shadow-md transition-shadow"
+                className="bg-white rounded-xl border border-slate-200/90 hover:border-[#c59b27]/60 p-5 flex flex-col justify-between hover:shadow-md hover:-translate-y-1 transition-all duration-200 group relative"
               >
                 <div>
-                  <div className="flex items-start justify-between gap-2 mb-3">
-                    <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full ${
-                      isTier2
-                        ? 'bg-purple-100 text-purple-700 border border-purple-200'
-                        : 'bg-emerald-100 text-emerald-700 border border-emerald-200'
-                    }`}>
-                      {isTier2 ? 'Tier 2 (Occupational)' : 'Tier 3 (Voluntary)'}
-                    </span>
-                    <span className="font-mono text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
-                      {scheme.code}
-                    </span>
+                  {/* Card Title & Icon Header */}
+                  <div className="flex items-center justify-between gap-2 mb-3">
+                    <div className="w-8 h-8 rounded-lg bg-[#fbf7ec] border border-[#ecdab1] flex items-center justify-center text-[#c59b27] group-hover:scale-105 transition-transform">
+                      <Layers className="w-4 h-4" />
+                    </div>
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wide">
+                        {isTier2 ? 'Tier 2 (Occupational)' : 'Tier 3 (Voluntary)'}
+                      </span>
+                      <span className="font-mono text-[11px] font-semibold text-slate-600 bg-slate-50 px-2 py-0.5 rounded border border-slate-200">
+                        {scheme.code}
+                      </span>
+                    </div>
                   </div>
 
-                  <h3 className="text-base font-bold text-slate-900 mb-1">{scheme.name}</h3>
+                  <h3 className="text-sm font-bold text-[#0f1d33] mb-1.5 group-hover:text-[#0f1d33]">
+                    {scheme.name}
+                  </h3>
                   <p className="text-xs text-slate-600 line-clamp-3 leading-relaxed mb-4">
-                    {scheme.description || 'No description provided for this pension scheme.'}
+                    {scheme.description || 'Institutional retirement and provident fund product.'}
                   </p>
                 </div>
 
-                <div className="pt-4 border-t border-slate-100 flex items-center justify-between">
-                  <div className="text-[11px] text-slate-400">Scheme #{scheme.id}</div>
+                <div className="pt-3 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="text-slate-400 font-mono text-[11px]">Scheme #{scheme.id}</span>
                   <button
                     onClick={() => handleOpenNavModal(scheme)}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-900 text-white hover:bg-slate-800 transition-colors"
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-bold bg-slate-100 hover:bg-[#0f1d33] text-slate-800 hover:text-white transition-all duration-150 active:scale-95 shadow-2xs"
                   >
-                    <TrendingUp className="w-3.5 h-3.5 text-amber-400" />
+                    <TrendingUp className="w-3.5 h-3.5 text-[#c59b27]" />
                     NAV History
                   </button>
                 </div>
@@ -178,43 +184,43 @@ export default function SchemesTab({
         </div>
       )}
 
-      {/* NAV History & Update Modal */}
+      {/* NAV History & Valuation Modal */}
       {selectedSchemeForNav && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+          <div className="bg-white rounded-xl p-6 sm:p-7 max-w-lg w-full border border-slate-200 max-h-[90vh] overflow-y-auto shadow-xl animate-fadeIn">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100">
               <div>
-                <span className="text-xs font-semibold text-amber-600 uppercase tracking-wider block mb-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#c59b27] block mb-0.5">
                   Net Asset Value Tracking
                 </span>
-                <h3 className="text-xl font-bold text-slate-900">{selectedSchemeForNav.name}</h3>
-                <p className="text-xs text-slate-500 font-mono mt-0.5">Code: {selectedSchemeForNav.code}</p>
+                <h3 className="text-base font-bold text-[#0f1d33]">{selectedSchemeForNav.name}</h3>
+                <p className="text-[11px] text-slate-400 font-mono mt-0.5">Code: {selectedSchemeForNav.code}</p>
               </div>
               <button
                 onClick={() => setSelectedSchemeForNav(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+                className="p-1 rounded text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            {/* Record NAV Form (Admin) */}
-            <div className="my-5 p-4 rounded-2xl bg-slate-50 border border-slate-200">
+            {/* Record NAV Form */}
+            <div className="my-4 p-3.5 rounded-lg bg-slate-50 border border-slate-200">
               <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                <TrendingUp className="w-4 h-4 text-amber-500" />
-                Record Daily NAV Valuation
+                <TrendingUp className="w-3.5 h-3.5 text-[#c59b27]" />
+                Record Daily Valuation Rate
               </h4>
 
               {navError && (
-                <div className="mb-3 p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-1.5">
-                  <AlertCircle className="w-4 h-4 shrink-0" />
+                <div className="mb-2.5 p-2 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-1.5">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                   <span>{navError}</span>
                 </div>
               )}
 
               <form onSubmit={handleAddNav} className="flex gap-2">
                 <div className="relative flex-1">
-                  <span className="absolute left-3 top-2.5 text-slate-400 text-xs font-semibold">GH₵</span>
+                  <span className="absolute left-3 top-2 text-slate-400 text-xs font-semibold">GH₵</span>
                   <input
                     type="number"
                     step="0.0001"
@@ -223,46 +229,40 @@ export default function SchemesTab({
                     placeholder="1.2500"
                     value={newNavPrice}
                     onChange={(e) => setNewNavPrice(e.target.value)}
-                    className="w-full pl-11 pr-3 py-2 bg-white border border-slate-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                    className="w-full pl-11 pr-3 py-1.5 bg-white border border-slate-300 rounded text-xs font-bold focus:outline-hidden focus:ring-2 focus:ring-[#0f1d33]/20 focus:border-[#0f1d33]"
                   />
                 </div>
                 <button
                   type="submit"
                   disabled={navSubmitting}
-                  className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl shadow-xs disabled:opacity-50"
+                  className="px-3.5 py-1.5 bg-[#0f1d33] hover:bg-[#182b49] text-white text-xs font-bold rounded shadow-xs active:scale-95 transition-all disabled:opacity-50"
                 >
                   {navSubmitting ? 'Posting...' : 'Update NAV'}
                 </button>
               </form>
-              {!isAdmin && (
-                <p className="text-[11px] text-slate-500 mt-2 flex items-center gap-1">
-                  <ShieldAlert className="w-3.5 h-3.5 text-amber-500" />
-                  Note: Backend requires <strong>Admin</strong> role to update NAV.
-                </p>
-              )}
             </div>
 
             {/* NAV List */}
             <div>
               <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
-                Historical Valuations
+                Historical Rates
               </h4>
 
               {loadingNav ? (
-                <div className="py-6 text-center text-xs text-slate-400">Loading NAV rates...</div>
+                <div className="py-6 text-center text-xs text-slate-400">Loading historical valuations...</div>
               ) : navHistory.length === 0 ? (
-                <div className="p-4 rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-400">
-                  No historical NAV recorded yet for this scheme.
+                <div className="p-4 rounded border border-dashed border-slate-200 text-center text-xs text-slate-400">
+                  No historical NAV rates published yet.
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100 max-h-56 overflow-y-auto border border-slate-200 rounded-xl">
+                <div className="divide-y divide-slate-100 max-h-52 overflow-y-auto border border-slate-200 rounded-lg">
                   {navHistory.map((item) => (
-                    <div key={item.id} className="flex items-center justify-between p-3 text-xs">
+                    <div key={item.id} className="flex items-center justify-between p-2.5 text-xs hover:bg-slate-50 transition-colors">
                       <div className="flex items-center gap-2">
                         <Calendar className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="text-slate-600">
-                          {new Date(item.effectiveDate).toLocaleString()}
+                        <span className="text-slate-600 font-medium">
+                          {new Date(item.effectiveDate).toLocaleDateString(undefined, { dateStyle: 'medium' })}
                         </span>
                       </div>
                       <span className="font-mono font-bold text-slate-900">
@@ -274,10 +274,10 @@ export default function SchemesTab({
               )}
             </div>
 
-            <div className="pt-5 border-t border-slate-100 flex justify-end mt-4">
+            <div className="pt-3 border-t border-slate-100 flex justify-end mt-4">
               <button
                 onClick={() => setSelectedSchemeForNav(null)}
-                className="px-4 py-2 text-sm font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl"
+                className="px-3.5 py-1.5 text-xs font-bold bg-slate-100 hover:bg-slate-200 text-slate-800 rounded transition-colors"
               >
                 Close
               </button>
@@ -289,64 +289,64 @@ export default function SchemesTab({
       {/* Create Scheme Modal */}
       {showCreateModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Layers className="w-5 h-5 text-amber-500" />
+          <div className="bg-white rounded-xl p-6 sm:p-7 max-w-md w-full border border-slate-200 shadow-xl animate-fadeIn">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-base font-bold text-[#0f1d33] flex items-center gap-2">
+                <Layers className="w-4 h-4 text-[#c59b27]" />
                 Create Pension Scheme
               </h3>
               <button
                 onClick={() => setShowCreateModal(false)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+                className="p-1 rounded text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {createError && (
-              <div className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+              <div className="mt-3 p-2.5 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{createError}</span>
               </div>
             )}
 
-            <form onSubmit={handleCreateScheme} className="space-y-4 mt-4">
+            <form onSubmit={handleCreateScheme} className="space-y-3.5 mt-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-bold text-slate-700 mb-1">
                   Scheme Name *
                 </label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Phoenix Tier 2 Master Trust"
+                  placeholder="e.g. Petra Master Trust Scheme"
                   value={newScheme.name}
                   onChange={(e) => setNewScheme({ ...newScheme, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-hidden focus:ring-2 focus:ring-[#0f1d33]/20 focus:border-[#0f1d33]"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
                     Scheme Code *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. PHX-T2-01"
+                    placeholder="e.g. PTR-T2-01"
                     value={newScheme.code}
                     onChange={(e) => setNewScheme({ ...newScheme, code: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm uppercase font-mono focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs uppercase font-mono focus:outline-hidden focus:ring-2 focus:ring-[#0f1d33]/20 focus:border-[#0f1d33]"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  <label className="block text-xs font-bold text-slate-700 mb-1">
                     Pension Tier
                   </label>
                   <select
                     value={newScheme.tier}
                     onChange={(e) => setNewScheme({ ...newScheme, tier: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                    className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs bg-white font-medium focus:outline-hidden focus:ring-2 focus:ring-[#0f1d33]/20 focus:border-[#0f1d33]"
                   >
                     <option value={0}>Tier 2 (Occupational)</option>
                     <option value={1}>Tier 3 (Voluntary)</option>
@@ -355,37 +355,30 @@ export default function SchemesTab({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Description
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Scheme Description
                 </label>
                 <textarea
                   rows={3}
-                  placeholder="Details regarding scheme eligibility, trustee info, and asset allocation..."
+                  placeholder="Eligibility criteria, asset mandate, and trustee terms..."
                   value={newScheme.description}
                   onChange={(e) => setNewScheme({ ...newScheme, description: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-amber-500"
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs focus:outline-hidden focus:ring-2 focus:ring-[#0f1d33]/20 focus:border-[#0f1d33]"
                 />
               </div>
-
-              {!isAdmin && (
-                <div className="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-800 flex items-center gap-1.5">
-                  <ShieldAlert className="w-4 h-4 shrink-0 text-amber-600" />
-                  <span>Only authenticated <strong>Admin</strong> users can create schemes.</span>
-                </div>
-              )}
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={() => setShowCreateModal(false)}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={createSubmitting}
-                  className="px-5 py-2 text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-slate-950 rounded-xl shadow-xs disabled:opacity-50"
+                  className="px-4 py-1.5 text-xs font-bold bg-[#0f1d33] hover:bg-[#182b49] text-white rounded shadow-xs hover:shadow-sm active:scale-95 transition-all disabled:opacity-50"
                 >
                   {createSubmitting ? 'Creating...' : 'Create Scheme'}
                 </button>

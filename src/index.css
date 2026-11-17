@@ -2,6 +2,15 @@
 
 @layer base {
   body {
-    @apply bg-slate-50 text-slate-900 antialiased font-sans;
+    @apply bg-slate-50 text-slate-800 antialiased font-sans;
   }
+}
+
+/* Institutional custom styling */
+:root {
+  --petra-navy: #0f1d33;
+  --petra-navy-light: #182b49;
+  --petra-gold: #c59b27;
+  --petra-gold-hover: #b0871d;
+  --petra-gold-light: #fbf7ec;
 }

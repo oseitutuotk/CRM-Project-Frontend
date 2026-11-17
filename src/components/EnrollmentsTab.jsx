@@ -4,15 +4,11 @@ import {
   Plus, 
   ArrowUpRight, 
   ArrowDownLeft, 
-  History, 
   Search, 
   X, 
   AlertCircle, 
-  CheckCircle2,
-  Calendar,
-  DollarSign,
-  TrendingUp,
-  Receipt
+  Receipt,
+  CheckCircle2
 } from 'lucide-react';
 import { enrollmentsApi } from '../api';
 
@@ -51,7 +47,6 @@ export default function EnrollmentsTab({
     submitting: false,
   });
 
-  // Watch for external trigger
   React.useEffect(() => {
     if (activeDepositEnrollment) {
       setTxModal({
@@ -132,7 +127,6 @@ export default function EnrollmentsTab({
         setTxModal((prev) => ({ ...prev, isOpen: false, submitting: false }));
         if (onCloseDepositModal) onCloseDepositModal();
         onRefresh();
-        // If history modal is also open, refresh it
         if (selectedEnrollmentForHistory?.id === txModal.enrollment.id) {
           handleOpenHistory(txModal.enrollment);
         }
@@ -151,14 +145,14 @@ export default function EnrollmentsTab({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header and Controls */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-200 shadow-xs">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200">
         <div>
-          <h2 className="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <Wallet className="w-5 h-5 text-emerald-600" />
-            Portfolios & Account Ledger
+          <h2 className="text-xl font-bold text-[#0f1d33] flex items-center gap-2">
+            <Wallet className="w-5 h-5 text-[#c59b27]" />
+            Member Portfolios & General Ledger
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Active scheme enrollments, contribution deposits, and redemption disbursements
+            Individual scheme holdings, contribution deposits, and withdrawal disbursements
           </p>
         </div>
 
@@ -170,9 +164,9 @@ export default function EnrollmentsTab({
             });
             onNewEnrollment({ isPromptOnly: true });
           }}
-          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-sm shadow-xs transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[#0f1d33] hover:bg-[#182b49] text-white font-semibold text-xs shadow-xs transition-colors"
         >
-          <Plus className="w-4 h-4" />
+          <Plus className="w-3.5 h-3.5 text-[#c59b27]" />
           Enroll Member
         </button>
       </div>
@@ -182,69 +176,68 @@ export default function EnrollmentsTab({
         <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
         <input
           type="text"
-          placeholder="Search enrollments by scheme name, code, or enrollment ID..."
+          placeholder="Search by scheme name, code, or account number..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-sm focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+          className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg text-xs focus:outline-hidden focus:ring-1 focus:ring-[#0f1d33]"
         />
       </div>
 
       {/* Enrollments Table */}
-      <div className="bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-xs">
+      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-600">
-            <thead className="bg-slate-50 text-[11px] font-bold text-slate-500 uppercase tracking-wider border-b border-slate-200">
+          <table className="w-full text-left text-xs text-slate-600">
+            <thead className="bg-slate-50 text-[11px] font-bold text-slate-600 uppercase tracking-wider border-b border-slate-200">
               <tr>
-                <th className="py-3 px-6">Account / ID</th>
-                <th className="py-3 px-6">Scheme</th>
-                <th className="py-3 px-6">Enrolled Date</th>
-                <th className="py-3 px-6 text-right">Available Balance</th>
-                <th className="py-3 px-6 text-right">Actions</th>
+                <th className="py-3.5 px-6">Account Ref</th>
+                <th className="py-3.5 px-6">Scheme</th>
+                <th className="py-3.5 px-6">Enrollment Date</th>
+                <th className="py-3.5 px-6 text-right">Available Balance</th>
+                <th className="py-3.5 px-6 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredEnrollments.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="py-12 text-center text-slate-400">
-                    No active scheme enrollments found. Click "Enroll Member" to link a user to a pension scheme.
+                    No member scheme portfolios found. Click "Enroll Member" to create one.
                   </td>
                 </tr>
               ) : (
                 filteredEnrollments.map((enr) => {
                   const balanceNum = Number(enr.balance || 0);
                   return (
-                    <tr key={enr.id} className="hover:bg-slate-50/80 transition-colors">
-                      <td className="py-4 px-6">
-                        <div className="font-mono font-bold text-xs text-slate-900">
+                    <tr key={enr.id} className="hover:bg-slate-50/60 transition-colors">
+                      <td className="py-3.5 px-6">
+                        <div className="font-mono font-bold text-xs text-[#0f1d33]">
                           #{enr.id}
                         </div>
-                        <div className="text-[11px] text-slate-400 font-mono">
-                          User: {enr.userId ? `${enr.userId.substring(0, 8)}...` : 'Unknown'}
+                        <div className="text-[10px] text-slate-400 font-mono">
+                          User ID: {enr.userId ? `${enr.userId.substring(0, 8)}...` : '—'}
                         </div>
                       </td>
-                      <td className="py-4 px-6">
+                      <td className="py-3.5 px-6">
                         <div className="font-semibold text-slate-900">
                           {enr.scheme?.name || `Scheme #${enr.schemeId}`}
                         </div>
-                        <div className="text-xs text-slate-400 font-mono">
+                        <div className="text-[11px] text-slate-400 font-mono">
                           {enr.scheme?.code}
                         </div>
                       </td>
-                      <td className="py-4 px-6 text-xs text-slate-500">
-                        {enr.enrolledAt ? new Date(enr.enrolledAt).toLocaleDateString() : '—'}
+                      <td className="py-3.5 px-6 text-slate-500">
+                        {enr.enrolledAt ? new Date(enr.enrolledAt).toLocaleDateString(undefined, { dateStyle: 'medium' }) : '—'}
                       </td>
-                      <td className="py-4 px-6 text-right">
-                        <span className="font-bold text-emerald-600 text-sm">
+                      <td className="py-3.5 px-6 text-right">
+                        <span className="font-bold text-[#0f1d33] text-sm">
                           GH₵ {balanceNum.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                         </span>
                       </td>
-                      <td className="py-4 px-6 text-right space-x-1.5">
+                      <td className="py-3.5 px-6 text-right space-x-1.5">
                         <button
                           onClick={() => handleOpenHistory(enr)}
-                          title="View Contributions & Redemptions ledger"
-                          className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors inline-flex items-center gap-1"
+                          className="px-2.5 py-1.5 rounded text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 transition-colors inline-flex items-center gap-1"
                         >
-                          <Receipt className="w-3.5 h-3.5 text-slate-500" />
+                          <Receipt className="w-3 h-3 text-slate-500" />
                           Ledger
                         </button>
                         <button
@@ -258,10 +251,9 @@ export default function EnrollmentsTab({
                               submitting: false,
                             });
                           }}
-                          title="Deposit funds"
-                          className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors inline-flex items-center gap-1"
+                          className="px-2.5 py-1.5 rounded text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-colors inline-flex items-center gap-1"
                         >
-                          <ArrowUpRight className="w-3.5 h-3.5 text-emerald-600" />
+                          <ArrowUpRight className="w-3 h-3 text-[#c59b27]" />
                           Deposit
                         </button>
                         <button
@@ -275,10 +267,9 @@ export default function EnrollmentsTab({
                               submitting: false,
                             });
                           }}
-                          title="Redeem/Withdraw funds"
-                          className="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors inline-flex items-center gap-1"
+                          className="px-2.5 py-1.5 rounded text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 transition-colors inline-flex items-center gap-1"
                         >
-                          <ArrowDownLeft className="w-3.5 h-3.5 text-rose-600" />
+                          <ArrowDownLeft className="w-3 h-3 text-slate-500" />
                           Redeem
                         </button>
                       </td>
@@ -291,20 +282,20 @@ export default function EnrollmentsTab({
         </div>
       </div>
 
-      {/* Transaction Modal (Contribution or Redemption) */}
+      {/* Transaction Modal (Deposit or Redemption) */}
       {txModal.isOpen && txModal.enrollment && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+          <div className="bg-white rounded-xl p-6 sm:p-7 max-w-md w-full border border-slate-200 shadow-xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-base font-bold text-[#0f1d33] flex items-center gap-2">
                 {txModal.type === 'contribution' ? (
                   <>
-                    <ArrowUpRight className="w-5 h-5 text-emerald-600" />
+                    <ArrowUpRight className="w-4 h-4 text-[#c59b27]" />
                     Record Contribution Deposit
                   </>
                 ) : (
                   <>
-                    <ArrowDownLeft className="w-5 h-5 text-rose-600" />
+                    <ArrowDownLeft className="w-4 h-4 text-slate-700" />
                     Record Member Redemption
                   </>
                 )}
@@ -314,15 +305,15 @@ export default function EnrollmentsTab({
                   setTxModal((prev) => ({ ...prev, isOpen: false }));
                   if (onCloseDepositModal) onCloseDepositModal();
                 }}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+                className="p-1 rounded text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="my-4 p-3 bg-slate-50 rounded-xl text-xs space-y-1">
+            <div className="my-3.5 p-3 bg-slate-50 rounded-lg text-xs space-y-1.5 border border-slate-100">
               <div className="flex justify-between">
-                <span className="text-slate-500">Account ID:</span>
+                <span className="text-slate-500">Account Ref:</span>
                 <span className="font-mono font-bold text-slate-800">#{txModal.enrollment.id}</span>
               </div>
               <div className="flex justify-between">
@@ -333,26 +324,26 @@ export default function EnrollmentsTab({
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Current Balance:</span>
-                <span className="font-bold text-emerald-600">
+                <span className="font-bold text-[#0f1d33]">
                   GH₵ {Number(txModal.enrollment.balance || 0).toFixed(2)}
                 </span>
               </div>
             </div>
 
             {txModal.error && (
-              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+              <div className="mb-3 p-2.5 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{txModal.error}</span>
               </div>
             )}
 
-            <form onSubmit={handleExecuteTransaction} className="space-y-4">
+            <form onSubmit={handleExecuteTransaction} className="space-y-3.5">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-medium text-slate-700 mb-1">
                   Amount (GH₵) *
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3.5 top-2.5 text-slate-400 font-semibold text-xs">GH₵</span>
+                  <span className="absolute left-3 top-2 text-slate-400 font-semibold text-xs">GH₵</span>
                   <input
                     type="number"
                     step="0.01"
@@ -360,7 +351,7 @@ export default function EnrollmentsTab({
                     required
                     value={txModal.amount}
                     onChange={(e) => setTxModal({ ...txModal, amount: e.target.value })}
-                    className="w-full pl-12 pr-4 py-2 border border-slate-300 rounded-xl text-sm font-semibold focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                    className="w-full pl-11 pr-3 py-1.5 border border-slate-300 rounded text-xs font-semibold focus:outline-hidden focus:ring-1 focus:ring-[#0f1d33]"
                   />
                 </div>
               </div>
@@ -372,7 +363,7 @@ export default function EnrollmentsTab({
                     key={amt}
                     type="button"
                     onClick={() => setTxModal({ ...txModal, amount: String(amt) })}
-                    className="flex-1 py-1 text-xs font-mono bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-700"
+                    className="flex-1 py-1 text-xs font-mono bg-slate-100 hover:bg-slate-200 rounded text-slate-700"
                   >
                     +GH₵{amt}
                   </button>
@@ -386,20 +377,16 @@ export default function EnrollmentsTab({
                     setTxModal((prev) => ({ ...prev, isOpen: false }));
                     if (onCloseDepositModal) onCloseDepositModal();
                   }}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={txModal.submitting}
-                  className={`px-5 py-2 text-sm font-semibold text-white rounded-xl shadow-xs disabled:opacity-50 ${
-                    txModal.type === 'contribution'
-                      ? 'bg-emerald-600 hover:bg-emerald-700'
-                      : 'bg-rose-600 hover:bg-rose-700'
-                  }`}
+                  className="px-4 py-1.5 text-xs font-semibold bg-[#0f1d33] hover:bg-[#182b49] text-white rounded shadow-xs disabled:opacity-50"
                 >
-                  {txModal.submitting ? 'Processing...' : txModal.type === 'contribution' ? 'Confirm Deposit' : 'Confirm Redemption'}
+                  {txModal.submitting ? 'Posting...' : txModal.type === 'contribution' ? 'Post Deposit' : 'Process Redemption'}
                 </button>
               </div>
             </form>
@@ -410,36 +397,36 @@ export default function EnrollmentsTab({
       {/* Ledger History Modal */}
       {selectedEnrollmentForHistory && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-start justify-between pb-4 border-b border-slate-100">
+          <div className="bg-white rounded-xl p-6 sm:p-7 max-w-lg w-full border border-slate-200 max-h-[90vh] overflow-y-auto shadow-xl">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100">
               <div>
-                <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider block mb-0.5">
-                  Account Ledger & Audit Trail
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#c59b27] block mb-0.5">
+                  Portfolio Audit Trail
                 </span>
-                <h3 className="text-xl font-bold text-slate-900">
+                <h3 className="text-base font-bold text-[#0f1d33]">
                   Account #{selectedEnrollmentForHistory.id}
                 </h3>
-                <p className="text-xs text-slate-500 font-mono">
+                <p className="text-[11px] text-slate-400 font-mono">
                   Scheme: {selectedEnrollmentForHistory.scheme?.name || selectedEnrollmentForHistory.schemeId}
                 </p>
               </div>
               <button
                 onClick={() => setSelectedEnrollmentForHistory(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+                className="p-1 rounded text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="py-4 space-y-5">
-              <div className="flex items-center justify-between p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+            <div className="py-4 space-y-4">
+              <div className="flex items-center justify-between p-3.5 bg-slate-50 rounded-lg border border-slate-200">
                 <div>
-                  <span className="text-xs text-emerald-800 font-medium block">Current Account Balance</span>
-                  <span className="text-2xl font-extrabold text-emerald-700">
+                  <span className="text-[11px] text-slate-500 font-medium block">Current Ledger Balance</span>
+                  <span className="text-xl font-bold text-[#0f1d33]">
                     GH₵ {Number(selectedEnrollmentForHistory.balance || 0).toLocaleString(undefined, { minimumFractionDigits: 2 })}
                   </span>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1.5">
                   <button
                     onClick={() => {
                       setTxModal({
@@ -451,7 +438,7 @@ export default function EnrollmentsTab({
                         submitting: false,
                       });
                     }}
-                    className="px-3 py-1.5 text-xs font-bold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700"
+                    className="px-2.5 py-1 text-xs font-semibold bg-[#0f1d33] text-white rounded hover:bg-[#182b49]"
                   >
                     + Deposit
                   </button>
@@ -466,7 +453,7 @@ export default function EnrollmentsTab({
                         submitting: false,
                       });
                     }}
-                    className="px-3 py-1.5 text-xs font-bold bg-rose-600 text-white rounded-lg hover:bg-rose-700"
+                    className="px-2.5 py-1 text-xs font-semibold bg-slate-200 text-slate-800 rounded hover:bg-slate-300"
                   >
                     - Redeem
                   </button>
@@ -474,25 +461,25 @@ export default function EnrollmentsTab({
               </div>
 
               {loadingDetails ? (
-                <div className="py-6 text-center text-xs text-slate-400">Loading ledger data...</div>
+                <div className="py-6 text-center text-xs text-slate-400">Loading ledger records...</div>
               ) : enrollmentDetails ? (
                 <div className="space-y-4">
-                  {/* Contributions List */}
+                  {/* Contributions */}
                   <div>
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <ArrowUpRight className="w-4 h-4 text-emerald-500" />
-                      Contributions Made ({enrollmentDetails.contributions?.length || 0})
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <ArrowUpRight className="w-3.5 h-3.5 text-[#c59b27]" />
+                      Contributions ({enrollmentDetails.contributions?.length || 0})
                     </h4>
                     {(!enrollmentDetails.contributions || enrollmentDetails.contributions.length === 0) ? (
                       <p className="text-xs text-slate-400 italic">No contributions recorded yet.</p>
                     ) : (
-                      <div className="divide-y divide-slate-100 max-h-40 overflow-y-auto border border-slate-200 rounded-xl">
+                      <div className="divide-y divide-slate-100 max-h-36 overflow-y-auto border border-slate-200 rounded-lg">
                         {enrollmentDetails.contributions.map((c) => (
-                          <div key={c.id} className="flex items-center justify-between p-2.5 text-xs">
+                          <div key={c.id} className="flex items-center justify-between p-2 text-xs">
                             <span className="text-slate-500">
-                              {c.contributedAt ? new Date(c.contributedAt).toLocaleString() : 'Recent'}
+                              {c.contributedAt ? new Date(c.contributedAt).toLocaleDateString(undefined, { dateStyle: 'medium' }) : 'Recent'}
                             </span>
-                            <span className="font-bold text-emerald-600 font-mono">
+                            <span className="font-bold text-[#0f1d33] font-mono">
                               +GH₵ {Number(c.amount).toFixed(2)}
                             </span>
                           </div>
@@ -501,22 +488,22 @@ export default function EnrollmentsTab({
                     )}
                   </div>
 
-                  {/* Redemptions List */}
+                  {/* Redemptions */}
                   <div>
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-                      <ArrowDownLeft className="w-4 h-4 text-rose-500" />
-                      Redemptions Paid ({enrollmentDetails.redemptions?.length || 0})
+                    <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                      <ArrowDownLeft className="w-3.5 h-3.5 text-slate-500" />
+                      Disbursements & Redemptions ({enrollmentDetails.redemptions?.length || 0})
                     </h4>
                     {(!enrollmentDetails.redemptions || enrollmentDetails.redemptions.length === 0) ? (
-                      <p className="text-xs text-slate-400 italic">No redemptions recorded yet.</p>
+                      <p className="text-xs text-slate-400 italic">No redemptions recorded.</p>
                     ) : (
-                      <div className="divide-y divide-slate-100 max-h-40 overflow-y-auto border border-slate-200 rounded-xl">
+                      <div className="divide-y divide-slate-100 max-h-36 overflow-y-auto border border-slate-200 rounded-lg">
                         {enrollmentDetails.redemptions.map((r) => (
-                          <div key={r.id} className="flex items-center justify-between p-2.5 text-xs">
+                          <div key={r.id} className="flex items-center justify-between p-2 text-xs">
                             <span className="text-slate-500">
-                              {r.redeemedAt ? new Date(r.redeemedAt).toLocaleString() : 'Recent'}
+                              {r.redeemedAt ? new Date(r.redeemedAt).toLocaleDateString(undefined, { dateStyle: 'medium' }) : 'Recent'}
                             </span>
-                            <span className="font-bold text-rose-600 font-mono">
+                            <span className="font-bold text-rose-700 font-mono">
                               -GH₵ {Number(r.amount).toFixed(2)}
                             </span>
                           </div>
@@ -528,10 +515,10 @@ export default function EnrollmentsTab({
               ) : null}
             </div>
 
-            <div className="pt-4 border-t border-slate-100 flex justify-end">
+            <div className="pt-3 border-t border-slate-100 flex justify-end">
               <button
                 onClick={() => setSelectedEnrollmentForHistory(null)}
-                className="px-4 py-2 text-sm font-semibold bg-slate-900 text-white rounded-xl hover:bg-slate-800"
+                className="px-3.5 py-1.5 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-800 rounded"
               >
                 Close
               </button>
@@ -543,39 +530,39 @@ export default function EnrollmentsTab({
       {/* New Scheme Enrollment Modal */}
       {activeEnrollModal && (
         <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200">
-            <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <Wallet className="w-5 h-5 text-emerald-600" />
+          <div className="bg-white rounded-xl p-6 sm:p-7 max-w-md w-full border border-slate-200 shadow-xl">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+              <h3 className="text-base font-bold text-[#0f1d33] flex items-center gap-2">
+                <Wallet className="w-4 h-4 text-[#c59b27]" />
                 Enroll Member in Scheme
               </h3>
               <button
                 onClick={onCloseEnrollModal}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600"
+                className="p-1 rounded text-slate-400 hover:text-slate-600"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {enrollError && (
-              <div className="mt-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
+              <div className="mt-3 p-2.5 rounded bg-rose-50 border border-rose-200 text-xs text-rose-700 flex items-center gap-2">
                 <AlertCircle className="w-4 h-4 shrink-0" />
                 <span>{enrollError}</span>
               </div>
             )}
 
-            <form onSubmit={handleCreateEnrollment} className="space-y-4 mt-4">
+            <form onSubmit={handleCreateEnrollment} className="space-y-3.5 mt-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-medium text-slate-700 mb-1">
                   Select Member *
                 </label>
                 <select
                   required
                   value={enrollForm.userId}
                   onChange={(e) => setEnrollForm({ ...enrollForm, userId: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs bg-white focus:outline-hidden focus:ring-1 focus:ring-[#0f1d33]"
                 >
-                  <option value="" disabled>-- Select a member --</option>
+                  <option value="" disabled>-- Select a registered member --</option>
                   {users.map((u) => (
                     <option key={u.id} value={u.id}>
                       {u.otherNames} {u.lastName} ({u.email})
@@ -585,14 +572,14 @@ export default function EnrollmentsTab({
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                <label className="block text-xs font-medium text-slate-700 mb-1">
                   Select Pension Scheme *
                 </label>
                 <select
                   required
                   value={enrollForm.schemeId}
                   onChange={(e) => setEnrollForm({ ...enrollForm, schemeId: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-300 rounded-xl text-sm bg-white focus:outline-hidden focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-1.5 border border-slate-300 rounded text-xs bg-white focus:outline-hidden focus:ring-1 focus:ring-[#0f1d33]"
                 >
                   <option value="" disabled>-- Select a scheme --</option>
                   {schemes.map((s) => (
@@ -607,14 +594,14 @@ export default function EnrollmentsTab({
                 <button
                   type="button"
                   onClick={onCloseEnrollModal}
-                  className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-100 rounded-xl"
+                  className="px-3.5 py-1.5 text-xs text-slate-600 hover:bg-slate-100 rounded"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={enrollSubmitting}
-                  className="px-5 py-2 text-sm font-semibold bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl shadow-xs disabled:opacity-50"
+                  className="px-4 py-1.5 text-xs font-semibold bg-[#0f1d33] hover:bg-[#182b49] text-white rounded shadow-xs disabled:opacity-50"
                 >
                   {enrollSubmitting ? 'Enrolling...' : 'Confirm Enrollment'}
                 </button>
