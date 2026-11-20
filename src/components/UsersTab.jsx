@@ -15,7 +15,7 @@ import {
   Receipt,
   CheckCircle2,
   Calendar,
-  DollarSign
+  Coins
 } from 'lucide-react';
 import { usersApi, enrollmentsApi } from '../api';
 

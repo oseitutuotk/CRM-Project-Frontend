@@ -5,7 +5,7 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const rawTarget = env.VITE_BACKEND_URL || 'https://28zxtsmh-7293.eun1.devtunnels.ms/';
+  const rawTarget = env.VITE_BACKEND_URL || 'https://wc9bcwdn-7293.uks1.devtunnels.ms/';
   const backendTarget = rawTarget.trim().replace(/\/$/, '');
 
   return {

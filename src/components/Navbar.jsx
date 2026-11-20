@@ -1,19 +1,19 @@
 import React from 'react';
 import { 
+  Building2, 
   Users, 
   Layers, 
   LayoutDashboard, 
   LogIn, 
   LogOut, 
-  ShieldCheck, 
-  User as UserIcon,
-  Sparkles
+  ShieldCheck
 } from 'lucide-react';
 
 export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLogout }) {
   const navItems = [
     { id: 'dashboard', label: 'Overview', icon: LayoutDashboard },
-    { id: 'users', label: 'Members', icon: Users },
+    { id: 'clients', label: 'Corporate Clients', icon: Building2 },
+    { id: 'customers', label: 'Customers', icon: Users },
     { id: 'schemes', label: 'Pension Schemes', icon: Layers },
   ];
 
@@ -41,12 +41,14 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
           <nav className="hidden md:flex items-center gap-1.5 bg-slate-100/70 p-1 rounded-xl border border-slate-200/80">
             {navItems.map((item) => {
               const Icon = item.icon;
-              const isActive = activeTab === item.id;
+              const isActive = activeTab === item.id || 
+                (item.id === 'clients' && activeTab === 'client-detail') ||
+                (item.id === 'customers' && activeTab === 'customer-detail');
               return (
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-semibold transition-all duration-150 ${
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all duration-150 ${
                     isActive
                       ? 'bg-[#0f1d33] text-white shadow-xs'
                       : 'text-slate-600 hover:text-slate-900 hover:bg-white/80 hover:shadow-2xs'
@@ -103,13 +105,15 @@ export default function Navbar({ activeTab, setActiveTab, user, onOpenAuth, onLo
         <div className="flex md:hidden items-center justify-around py-2 border-t border-slate-100">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = activeTab === item.id;
+            const isActive = activeTab === item.id ||
+              (item.id === 'clients' && activeTab === 'client-detail') ||
+              (item.id === 'customers' && activeTab === 'customer-detail');
             return (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex flex-col items-center gap-1 text-[11px] font-semibold py-1.5 px-3 rounded-lg transition-colors ${
-                  isActive ? 'text-[#0f1d33] bg-slate-100' : 'text-slate-500 hover:text-slate-900'
+                className={`flex flex-col items-center gap-1 text-[11px] font-semibold py-1.5 px-2 rounded-lg transition-colors ${
+                  isActive ? 'text-[#0f1d33] bg-slate-100 font-bold' : 'text-slate-500 hover:text-slate-900'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-[#c59b27]' : ''}`} />
